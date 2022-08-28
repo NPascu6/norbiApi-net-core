@@ -32,12 +32,20 @@ var configurationBuilder = new ConfigurationBuilder()
                             .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
                             .AddEnvironmentVariables();
 
-builder.Configuration.AddConfiguration(configurationBuilder.Build());
-
 builder.Services.AddDbContext<UserContext>(options =>
    options.UseNpgsql(defaultConnectionString));
 
+var serviceProvider = builder.Services.BuildServiceProvider();
+try
+{
+    var dbContext = serviceProvider.GetRequiredService<UserContext>();
+    dbContext.Database.Migrate();
+}
+catch
+{
+}
 // Add services to the container.
+builder.Configuration.AddConfiguration(configurationBuilder.Build());
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
